@@ -60,6 +60,6 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
    */
     public function todo()
     {
-        return $this->hasMany('App\Todo', 'user_id');
+        return $this->hasMany('App\Models\Todo', 'user_id');
     }
 }

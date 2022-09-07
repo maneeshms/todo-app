@@ -23,4 +23,11 @@ Route::group([
     Route::post('logout', 'AuthController@logout');
     Route::post('refresh', 'AuthController@refresh');
     Route::post('user-profile', 'AuthController@me');
+    Route::post('todo/', 'TodoController@create');
+    Route::get('todo/', 'TodoController@findAll');
+    Route::get('todo/me/', 'TodoController@findMine');
+    Route::get('todo/{id}/', 'TodoController@findOne');
+    Route::put('todo/{id}/', 'TodoController@update');
+    Route::delete('todo/{id}/', 'TodoController@remove');
+    Route::put('todo/completed/{id}/', 'TodoController@markAsCompleted');
 });

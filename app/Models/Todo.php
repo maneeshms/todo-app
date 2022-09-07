@@ -21,6 +21,6 @@ class Todo extends Model implements AuthenticatableContract, AuthorizableContrac
      * @var array
      */
     protected $fillable = [
-        'user_id', 'content', 'completed_at',
+        'user_id', 'content',
     ];
 }
