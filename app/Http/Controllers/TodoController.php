@@ -86,7 +86,8 @@ class TodoController extends Controller
         if (Auth::user()->todo()->Create($request->all())) {
             return response()->json(['status' => 'success']);
         } else {
-            return response()->json(['status' => 'fail']);
+            return response()->json(['status' => 'failed', 'message' => 'Something went wrong'])
+                        ->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR, Response::$statusTexts[Response::HTTP_INTERNAL_SERVER_ERROR]);
         }
     }
 
@@ -117,18 +118,27 @@ class TodoController extends Controller
           'completed' => 'required|boolean',
       ]);
         if (!$validator->fails()) {
-            $todo = Todo::find($id);
-            if ($request->completed) {
-                $todo->completed_at = Carbon::now();
+            if (Gate::allows('has-authorization', $todo)) {
+                $todo = Todo::find($id);
+                if ($request->completed) {
+                    $todo->completed_at = Carbon::now();
+                } else {
+                    $todo->completed_at = null;
+                }
+                if ($todo->save()) {
+                    return response()->json(['status' => 'success']);
+                } else {
+                    return response()->json(['status' => 'failed', 'message' => 'Something went wrong'])
+                        ->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR, Response::$statusTexts[Response::HTTP_INTERNAL_SERVER_ERROR]);
+                }
             } else {
-                $todo->completed_at = null;
-            }
-            if ($todo->save()) {
-                return response()->json(['status' => 'success']);
+                return response()->json(['status' => 'failed', 'message' => 'Unauthorized'])
+                    ->setStatusCode(Response::HTTP_UNAUTHORIZED, Response::$statusTexts[Response::HTTP_UNAUTHORIZED]);
             }
         }
 
-        return response()->json(['status' => 'failed']);
+        return response()->json(['status' => 'failed', 'message' => 'Bad request'])
+                    ->setStatusCode(Response::HTTP_BAD_REQUEST, Response::$statusTexts[Response::HTTP_BAD_REQUEST]);
     }
 
     /**
@@ -142,14 +152,20 @@ class TodoController extends Controller
     {
         $todo = Todo::find($id);
         if ($todo) {
-            Gate::authorize('has-authorization', );
-            if (Todo::destroy($id)) {
-                return response()->json(['status' => 'success']);
+            if (Gate::allows('has-authorization', $todo)) {
+                if (Todo::destroy($id)) {
+                    return response()->json(['status' => 'success']);
+                } else {
+                    return response()->json(['status' => 'failed', 'message' => 'Something went wrong'])
+                        ->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR, Response::$statusTexts[Response::HTTP_INTERNAL_SERVER_ERROR]);
+                }
             } else {
-                abort(500, 'Something went wrong.');
+                return response()->json(['status' => 'failed', 'message' => 'Unauthorized'])
+                ->setStatusCode(Response::HTTP_UNAUTHORIZED, Response::$statusTexts[Response::HTTP_UNAUTHORIZED]);
             }
         } else {
-            abort(404, 'Todo not found');
+            return response()->json(['status' => 'failed', 'message' => 'Todo not found'])
+                ->setStatusCode(Response::HTTP_NOT_FOUND, Response::$statusTexts[Response::HTTP_NOT_FOUND]);
         }
     }
 }
