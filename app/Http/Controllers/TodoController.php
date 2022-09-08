@@ -105,21 +105,7 @@ class TodoController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param int $id
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        $todo = Todo::where('id', $id)->get();
-
-        return view('todo.edittodo', ['todos' => $todo]);
-    }
-
-    /**
-     * Update the specified resource in storage.
+     * Mark the todo as completed or incompleted.
      *
      * @param int $id
      *
